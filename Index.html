@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Data Peserta Didik</title>
+    <!-- Menggunakan Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Menggunakan Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom scrollbar untuk tabel */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1; 
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8; 
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
+
+    <div class="max-w-[95%] mx-auto py-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-700">Data Peserta Didik</h1>
+                <p class="text-sm text-gray-500">Tampilan Spreadsheet - Edit & Kelola Data Siswa</p>
+            </div>
+            <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center transition-colors">
+                <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Tambah Siswa
+            </button>
+        </div>
+
+        <!-- Tabel Data -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto table-container">
+                <table class="w-full text-sm text-left whitespace-nowrap">
+                    <thead class="bg-gray-100 text-gray-600 font-semibold border-b">
+                        <tr>
+                            <th class="px-4 py-3 text-center w-12">No</th>
+                            <th class="px-4 py-3 text-center">Aksi</th>
+                            <th class="px-4 py-3">NIS</th>
+                            <th class="px-4 py-3">NISN</th>
+                            <th class="px-4 py-3 min-w-[200px]">Nama</th>
+                            <th class="px-4 py-3">Panggilan</th>
+                            <th class="px-4 py-3 min-w-[200px]">Tempat / Tanggal Lahir</th>
+                            <th class="px-4 py-3">Jenis Kelamin</th>
+                            <th class="px-4 py-3">Agama</th>
+                            <th class="px-4 py-3 min-w-[200px]">Pendidikan Sebelumnya</th>
+                            <th class="px-4 py-3 min-w-[250px]">Alamat Peserta Didik (Jalan)</th>
+                            <th class="px-4 py-3 min-w-[180px]">Nama Ayah</th>
+                            <th class="px-4 py-3 min-w-[180px]">Nama Ibu</th>
+                            <th class="px-4 py-3 min-w-[150px]">Pekerjaan Ayah</th>
+                            <th class="px-4 py-3 min-w-[150px]">Pekerjaan Ibu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-200">
+                        <!-- Data akan dirender di sini oleh JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form (Untuk Tambah & Edit) -->
+    <div id="formModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-5 border-b border-gray-200">
+                <h2 id="modalTitle" class="text-xl font-bold text-gray-800">Edit Data Siswa</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="p-5 overflow-y-auto">
+                <form id="studentForm" onsubmit="saveData(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="hidden" id="dataIndex">
+                    
+                    <!-- Form Group -->
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">NIS</label>
+                        <input type="text" id="input_nis" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required></div>
+                    
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">NISN</label>
+                        <input type="text" id="input_nisn" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required></div>
+                    
+                    <div class="md:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                        <input type="text" id="input_nama" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required></div>
+                    
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Nama Panggilan</label>
+                        <input type="text" id="input_panggilan" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+                    
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Tempat / Tanggal Lahir</label>
+                        <input type="text" id="input_ttl" placeholder="Contoh: Banyumas, 20 Mei 2018" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required></div>
+                    
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin</label>
+                        <select id="input_jk" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                            <option value="Laki-Laki">Laki-Laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select></div>
+                    
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Agama</label>
+                        <input type="text" id="input_agama" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required></div>
+                    
+                    <div class="md:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">Pendidikan Sebelumnya</label>
+                        <input type="text" id="input_pendidikan" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+                    
+                    <div class="md:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">Alamat Peserta Didik (Jalan)</label>
+                        <input type="text" id="input_alamat" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" required></div>
+
+                    <div class="mt-4 md:col-span-2 border-t pt-4">
+                        <h3 class="font-semibold text-gray-800 mb-3">Data Orang Tua</h3>
+                    </div>
+
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Nama Ayah</label>
+                        <input type="text" id="input_ayah_nama" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+                    
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Pekerjaan Ayah</label>
+                        <input type="text" id="input_ayah_pekerjaan" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Nama Ibu</label>
+                        <input type="text" id="input_ibu_nama" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+                    
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Pekerjaan Ibu</label>
+                        <input type="text" id="input_ibu_pekerjaan" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></div>
+                </form>
+            </div>
+            
+            <div class="p-5 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
+                <button type="button" onclick="closeModal()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors">Batal</button>
+                <button type="submit" id="btnSimpan" form="studentForm" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">Simpan Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data dan Logika JavaScript -->
+    <script>
+        // === KONFIGURASI GOOGLE SHEETS ===
+        // Ganti URL ini dengan URL Web App dari Google Apps Script Anda (Instruksi ada di chat)
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMoEbieb44qg2SimktmhPSh6siuIt0iRhDGTGivIoXVEejdC0UYWN4x567UYZVE1E/exec'; 
+
+        // Data Default Siswa (Akan dipakai jika SCRIPT_URL di atas masih kosong)
+        let students = [
+            { nis: '3545', nisn: '3186088743', nama: 'Atha Zafran Ramadhan', panggilan: '', ttl: 'Banyumas, 20 Mei 2018', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'TK PERTIWI GERDUREN', alamat: 'Gerduren, RT 01 RW 06', ayah_nama: 'Mukheron', ibu_nama: 'Maryanti', ayah_pekerjaan: 'Karyawan Swasta', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3546', nisn: '3184668441', nama: 'Cakra Abiyasa', panggilan: '', ttl: 'Jakarta, 02 September 2018', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'TK DIPONEGORO GERDUREN', alamat: 'Gerduren, RT 03 RW 05', ayah_nama: 'Komari', ibu_nama: 'Susmiyati', ayah_pekerjaan: 'Karyawan Swasta', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3547', nisn: '3198245070', nama: 'Delia Zahra Salsabila', panggilan: '', ttl: 'Banyumas, 19 April 2019', jk: 'Perempuan', agama: 'Islam', pendidikan: 'KB AZ ZAHRA', alamat: 'Gerduren, RT 02 RW 06', ayah_nama: 'Salahudin', ibu_nama: 'Mugiarti', ayah_pekerjaan: 'Petani', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3548', nisn: '3182191613', nama: 'Elvano Akmal Dwitama', panggilan: '', ttl: 'Banyumas, 11 September 2018', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'TK DIPONEGORO GERDUREN', alamat: 'Gerduren, RT 03 RW 07', ayah_nama: 'Tri Marsudi', ibu_nama: 'Bhetavia Biarawati', ayah_pekerjaan: 'Karyawan Swasta', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3550', nisn: '3180097773', nama: 'Fajar Askari Ramdani', panggilan: '', ttl: 'Banyumas, 15 Juni 2018', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'TK DIPONEGORO GERDUREN', alamat: 'Gerduren, RT 03 RW 06', ayah_nama: 'Sukiwan', ibu_nama: 'Sumarti', ayah_pekerjaan: 'Petani', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3551', nisn: '3190609374', nama: 'Farra Aysha Azzahra', panggilan: '', ttl: 'Banyumas, 25 Juli 2019', jk: 'Perempuan', agama: 'Islam', pendidikan: 'KB AZ ZAHRA', alamat: 'Gerduren, RT 01 RW 06', ayah_nama: 'Dwi Purwanto Prasetyo', ibu_nama: 'Sulastri', ayah_pekerjaan: 'Wiraswasta', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3552', nisn: '3196928983', nama: 'Fauziah Hasni Faiq Syarif', panggilan: '', ttl: 'Banyumas, 21 Maret 2019', jk: 'Perempuan', agama: 'Islam', pendidikan: 'TK DIPONEGORO GERDUREN', alamat: 'Gerduren, RT 03 RW 07', ayah_nama: 'Solehudin Syarif', ibu_nama: 'Sochatun Hasanah', ayah_pekerjaan: 'Wiraswasta', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3553', nisn: '3176829400', nama: 'Fellisa Putri Hidayat', panggilan: '', ttl: 'Depok, 17 November 2017', jk: 'Perempuan', agama: 'Islam', pendidikan: 'KB BINTANG CENDEKIA', alamat: 'Gerduren, RT 03 RW 19', ayah_nama: 'Rahmat Hidayat', ibu_nama: 'Siti Masuroh', ayah_pekerjaan: 'Buruh', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3554', nisn: '3194416472', nama: 'Ghali Nufail Tsamaradanie', panggilan: '', ttl: 'Banyumas, 03 Agustus 2019', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'TK PERTIWI GERDUREN', alamat: 'Gerduren, RT 03 RW 05', ayah_nama: 'Danie Tofik', ibu_nama: 'Enggah Wuryanti', ayah_pekerjaan: 'Karyawan Swasta', ibu_pekerjaan: 'Guru' },
+            { nis: '3555', nisn: '3181245719', nama: 'Gilang Arjuna Ramadhan', panggilan: '', ttl: 'Banyumas, 23 Mei 2018', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'TK PERTIWI GERDUREN', alamat: 'Gerduren, RT 03 RW 06', ayah_nama: 'Juniarto', ibu_nama: 'Ari Murti', ayah_pekerjaan: 'Lainnya', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3556', nisn: '3185432764', nama: 'Hafit Ramadhani Safutra', panggilan: '', ttl: 'Banyumas, 22 Mei 2018', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'KB AZ ZAHRA', alamat: 'Gerduren, RT 03 RW 05', ayah_nama: 'Sugeng Riyadi', ibu_nama: 'Ulpiyanah', ayah_pekerjaan: 'Karyawan Swasta', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3557', nisn: '3198630567', nama: 'Kesya Lutfia Alhanisputri', panggilan: '', ttl: 'Banyumas, 29 Maret 2019', jk: 'Perempuan', agama: 'Islam', pendidikan: 'TK DIPONEGORO GERDUREN', alamat: 'Gerduren, RT 02 RW 08', ayah_nama: 'Johan Nurhidayat', ibu_nama: 'Feni Fajar Hastuti', ayah_pekerjaan: 'Karyawan Swasta', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3558', nisn: '3180176114', nama: 'Maulana Yusuf Alfarizqi', panggilan: '', ttl: 'Banyumas, 08 September 2018', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'TK AL QAUTSAR', alamat: 'Gerduren, RT 02 RW 08', ayah_nama: 'Solihin', ibu_nama: 'Mulyaningsih', ayah_pekerjaan: 'Buruh', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3559', nisn: '3185715005', nama: 'Muhammad Abdilah Muzaqi', panggilan: '', ttl: 'Banyumas, 19 Juni 2018', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'TK PERTIWI GERDUREN', alamat: 'Gerduren, RT 04 RW 06', ayah_nama: 'Supriatna', ibu_nama: 'Nurisma Yanti', ayah_pekerjaan: 'Buruh', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3560', nisn: '3195455121', nama: 'Rafasya Alvin Faaz', panggilan: '', ttl: 'Banyumas, 08 Februari 2019', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'TK DIPONEGORO GERDUREN', alamat: 'Gerduren, RT 03 RW 07', ayah_nama: 'Arianto', ibu_nama: 'Reni Asih', ayah_pekerjaan: 'Buruh', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3561', nisn: '3195732811', nama: 'Randy Prasetya', panggilan: '', ttl: 'Banyumas, 15 Januari 2019', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'TK DIPONEGORO GERDUREN', alamat: 'Gerduren, RT 02 RW 06', ayah_nama: 'Didit Prayitno', ibu_nama: 'Lisa Niswatun', ayah_pekerjaan: 'Karyawan Swasta', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3562', nisn: '3197098742', nama: 'Rivandra Luja Anugrah', panggilan: '', ttl: 'Banyumas, 03 Januari 2019', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'KB AZ ZAHRA', alamat: 'Gerduren, RT 01 RW 07', ayah_nama: 'Didit Riyanto', ibu_nama: 'Nofi Nurrohmawati', ayah_pekerjaan: 'Lainnya', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3563', nisn: '3180556733', nama: 'Wisnu Arya Kencana', panggilan: '', ttl: 'Banyumas, 27 November 2018', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'TK PERTIWI GERDUREN', alamat: 'Gerduren, RT 04 RW 06', ayah_nama: 'Rasum', ibu_nama: 'Noviatun', ayah_pekerjaan: 'Buruh', ibu_pekerjaan: 'Ibu Rumah Tangga' },
+            { nis: '3564', nisn: '3194871087', nama: 'Yusuf Afka Riansyah', panggilan: '', ttl: 'Banyumas, 22 Februari 2019', jk: 'Laki-Laki', agama: 'Islam', pendidikan: 'TK PERTIWI GERDUREN', alamat: 'Gerduren, RT 03 RW 07', ayah_nama: 'Setiyono', ibu_nama: 'Nuraeni', ayah_pekerjaan: 'Karyawan Swasta', ibu_pekerjaan: 'Ibu Rumah Tangga' }
+        ];
+
+        // Fungsi Load Data dari Google Sheets
+        async function loadData() {
+            if (!SCRIPT_URL) {
+                renderTable(); // Pakai data lokal jika URL belum ada
+                return;
+            }
+            try {
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = '<tr><td colspan="15" class="text-center py-6 text-gray-500">Mengambil data dari Spreadsheet...</td></tr>';
+                const response = await fetch(SCRIPT_URL);
+                const result = await response.json();
+                if(result.status === 'success' && result.data.length > 0) {
+                    students = result.data;
+                }
+                renderTable();
+            } catch(e) {
+                console.error(e);
+                renderTable(); // Fallback ke lokal jika gagal koneksi
+            }
+        }
+
+        // Fungsi untuk me-render tabel
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = ''; 
+
+            students.forEach((student, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-blue-50 transition-colors";
+                
+                tr.innerHTML = `
+                    <td class="px-4 py-3 text-center border-r text-gray-500">${index + 1}</td>
+                    <td class="px-4 py-3 text-center border-r">
+                        <button onclick="openModal(${index})" class="text-blue-600 hover:text-blue-800 bg-blue-100 hover:bg-blue-200 p-1.5 rounded" title="Edit Data">
+                            <i data-lucide="edit" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                    <td class="px-4 py-3 border-r font-medium text-gray-900">${student.nis}</td>
+                    <td class="px-4 py-3 border-r">${student.nisn}</td>
+                    <td class="px-4 py-3 border-r font-semibold">${student.nama}</td>
+                    <td class="px-4 py-3 border-r">${student.panggilan || '-'}</td>
+                    <td class="px-4 py-3 border-r">${student.ttl}</td>
+                    <td class="px-4 py-3 border-r">${student.jk}</td>
+                    <td class="px-4 py-3 border-r">${student.agama}</td>
+                    <td class="px-4 py-3 border-r text-gray-600">${student.pendidikan || '-'}</td>
+                    <td class="px-4 py-3 border-r">${student.alamat}</td>
+                    <td class="px-4 py-3 border-r">${student.ayah_nama || '-'}</td>
+                    <td class="px-4 py-3 border-r">${student.ibu_nama || '-'}</td>
+                    <td class="px-4 py-3 border-r text-gray-600">${student.ayah_pekerjaan || '-'}</td>
+                    <td class="px-4 py-3 text-gray-600">${student.ibu_pekerjaan || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            if(window.lucide) lucide.createIcons();
+        }
+
+        function openModal(index = -1) {
+            const modal = document.getElementById('formModal');
+            const form = document.getElementById('studentForm');
+            const title = document.getElementById('modalTitle');
+            
+            form.reset();
+
+            if (index > -1) {
+                title.innerText = "Edit Data Siswa";
+                const student = students[index];
+                document.getElementById('dataIndex').value = index;
+                
+                document.getElementById('input_nis').value = student.nis;
+                document.getElementById('input_nisn').value = student.nisn;
+                document.getElementById('input_nama').value = student.nama;
+                document.getElementById('input_panggilan').value = student.panggilan;
+                document.getElementById('input_ttl').value = student.ttl;
+                document.getElementById('input_jk').value = student.jk;
+                document.getElementById('input_agama').value = student.agama;
+                document.getElementById('input_pendidikan').value = student.pendidikan;
+                document.getElementById('input_alamat').value = student.alamat;
+                document.getElementById('input_ayah_nama').value = student.ayah_nama;
+                document.getElementById('input_ayah_pekerjaan').value = student.ayah_pekerjaan;
+                document.getElementById('input_ibu_nama').value = student.ibu_nama;
+                document.getElementById('input_ibu_pekerjaan').value = student.ibu_pekerjaan;
+            } else {
+                title.innerText = "Tambah Data Siswa Baru";
+                document.getElementById('dataIndex').value = -1;
+                document.getElementById('input_agama').value = "Islam";
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('formModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function saveData(event) {
+            event.preventDefault(); 
+            const index = parseInt(document.getElementById('dataIndex').value);
+            const btnSimpan = document.getElementById('btnSimpan');
+            
+            const newData = {
+                nis: document.getElementById('input_nis').value,
+                nisn: document.getElementById('input_nisn').value,
+                nama: document.getElementById('input_nama').value,
+                panggilan: document.getElementById('input_panggilan').value,
+                ttl: document.getElementById('input_ttl').value,
+                jk: document.getElementById('input_jk').value,
+                agama: document.getElementById('input_agama').value,
+                pendidikan: document.getElementById('input_pendidikan').value,
+                alamat: document.getElementById('input_alamat').value,
+                ayah_nama: document.getElementById('input_ayah_nama').value,
+                ayah_pekerjaan: document.getElementById('input_ayah_pekerjaan').value,
+                ibu_nama: document.getElementById('input_ibu_nama').value,
+                ibu_pekerjaan: document.getElementById('input_ibu_pekerjaan').value,
+            };
+
+            const actionType = index > -1 ? 'update' : 'add';
+
+            if (!SCRIPT_URL) {
+                // Mode Lokal (Belum ada URL Spreadsheet)
+                if (index > -1) students[index] = newData;
+                else students.push(newData);
+                finishSave(btnSimpan);
+                return;
+            }
+
+            // Mode Cloud: Simpan ke Google Sheets via API
+            btnSimpan.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Menyimpan...';
+            btnSimpan.disabled = true;
+            if(window.lucide) lucide.createIcons();
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: actionType, data: newData })
+                });
+                
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    if (index > -1) students[index] = newData;
+                    else students.push(newData);
+                    finishSave(btnSimpan);
+                } else {
+                    throw new Error("Gagal dari server");
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Gagal menyimpan ke Spreadsheet. Pastikan URL Apps Script benar.');
+                btnSimpan.innerHTML = 'Simpan Data';
+                btnSimpan.disabled = false;
+            }
+        }
+
+        function finishSave(btnSimpan) {
+            closeModal();
+            renderTable();
+            
+            const originalText = 'Simpan Data';
+            btnSimpan.innerHTML = originalText;
+            btnSimpan.disabled = false;
+
+            const btnTambah = document.querySelector('button[onclick="openModal()"]');
+            const originalTambah = btnTambah.innerHTML;
+            
+            btnTambah.innerHTML = '<i data-lucide="check" class="w-4 h-4 mr-2"></i> Tersimpan!';
+            btnTambah.classList.add('bg-green-600');
+            if(window.lucide) lucide.createIcons();
+            
+            setTimeout(() => {
+                btnTambah.innerHTML = originalTambah;
+                btnTambah.classList.remove('bg-green-600');
+                if(window.lucide) lucide.createIcons();
+            }, 2000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+        });
+    </script>
+</body>
+</html>
