@@ -1,2 +1,2 @@
-# Datasiswa2026
-Input data pribadi siswa
+# FunGames Literasi dan Numerasi
+2026
